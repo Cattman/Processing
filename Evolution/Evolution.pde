@@ -17,6 +17,7 @@ float[][] takenCoords;
 int population = 100;
 int numFood = population/2;
 int generations = 1; 
+
 //map size would matter
 
 void setup()
