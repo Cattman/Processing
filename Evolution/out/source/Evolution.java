@@ -1,3 +1,19 @@
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class Evolution extends PApplet {
+
 /* 
   Written by - Alex Watson
 
@@ -6,11 +22,11 @@
   Run with ctrl+shift+B
 */
 
-color yellow = #F6FF05;
-color red = #FF0505;
-color gray = #D3D3D3;
-color black = #000000;
-color white = #FFFFFF;
+int yellow = 0xffF6FF05;
+int red = 0xffFF0505;
+int gray = 0xffD3D3D3;
+int black = 0xff000000;
+int white = 0xffFFFFFF;
 
 Animal[] animals;
 Food[] foods;
@@ -18,21 +34,20 @@ float[][] takenCoords;
 int population = 100;
 int numFood = population/2;
 int generations = 1; 
-int day = 0;
 
 //map size would matter
 
-void setup()
+public void setup()
 {
-  size(1800, 1200);
+  
   background(white);
   //populate animals
   int i;  
   int j;
   float currentX;
   float currentY;
-  float x = 0.0; // initialize because it yells 
-  float y = 0.0; // 0 should get overridden
+  float x = 0.0f; // initialize because it yells 
+  float y = 0.0f; // 0 should get overridden
   boolean coordsAreFree = false;
   animals = new Animal[population];
   foods = new Food[numFood];
@@ -42,8 +57,8 @@ void setup()
   {
     println("for i");
     // Still need to randomize the init
-    int r = int(random(10, 30));
-    int s = int(random(10, 30));
+    int r = PApplet.parseInt(random(10, 30));
+    int s = PApplet.parseInt(random(10, 30));
     Animal a = new Animal(r,s);    
     
     //check if coords are occupado there should be i num coords now
@@ -58,9 +73,9 @@ void setup()
         {          
           currentX = takenCoords[j][0];
           currentY = takenCoords[j][1];
-          if((currentX != x || currentX == 0.0) && (currentX > (x+r) || currentX < (x-r)))
+          if((currentX != x || currentX == 0.0f) && (currentX > (x+r) || currentX < (x-r)))
           {
-            if((currentY != y || currentY == 0.0) && (currentY > (y+r) || currentY < (y-r)))
+            if((currentY != y || currentY == 0.0f) && (currentY > (y+r) || currentY < (y-r)))
             { //<>//
               println("Coord free");
               coordsAreFree = true;
@@ -98,9 +113,9 @@ void setup()
       {
         for(j = 0; j < i; j = j+1){
           
-          if(takenCoords[j][0] != x || takenCoords[j][0] == 0.0)
+          if(takenCoords[j][0] != x || takenCoords[j][0] == 0.0f)
           {
-            if(takenCoords[j][1] != y || takenCoords[j][1] == 0.0)
+            if(takenCoords[j][1] != y || takenCoords[j][1] == 0.0f)
             {
               println("Coord free");
               coordsAreFree = true;
@@ -126,13 +141,12 @@ void setup()
   DrawObjects();  
 }
 
-void draw()
+public void draw()
 {
-  // how many cycles in a day?
-  EndDay();
+  
 }
 
-void EndDay()
+public void EndDay()
 {
   int i;
   for(i = 0; i < population; i = i + 1)
@@ -140,13 +154,12 @@ void EndDay()
     animals[i].hunger = animals[i].hunger - 10;
     if (animals[i].hunger <= 0)
     {
-      animals[i].Die();
+      //kill
     }
   }
-  day = day + 1;
 }
 
-void DrawObjects()
+public void DrawObjects()
 {
   int i;
   println("drawing");
@@ -159,5 +172,75 @@ void DrawObjects()
   for(i = 0; i < foods.length; i = i+1)
   {
     foods[i].Draw();
+  }
+}
+class Animal
+{
+  float radius;
+  float area; 
+  float speed; //moving by blocks or pixels?
+  int hunger = 100; //range from what to what?
+  float x;
+  float y;
+  int rank;
+  
+  Animal(int r, int s)
+  {
+    this.radius = r;
+    this.area = PI * radius * radius;
+    this.speed = s;
+  }
+  
+  public void Eat(Animal animal)
+  {
+    //bigger size should equal more food
+    this.hunger = this.hunger + PApplet.parseInt(animal.area);
+  }
+  
+  public void Eat(Food food)
+  {
+    this.hunger = this.hunger + food.nutrition; 
+  }
+  
+  public void Draw()  
+  {    
+    ellipse(this.x, this.y, this.radius, this.radius);
+  }
+  
+  public void Move(float x, float y)
+  {
+    // maybe make x/y random 0 < value <= 1 depending on 
+    // what direction food/other animals are
+    // speed should be some num 0 < speed <= 2
+    this.x = this.x + (x * this.speed);
+    this.y = this.y + (y * this.speed);
+  }
+}
+class Food
+{
+ float x; 
+ float y;
+ int nutrition = 5;
+ 
+ Food(float x, float y)
+ {
+   this.x = x;
+   this.y = y;
+ }
+ 
+ public void Draw()
+ {
+   ellipse(this.x, this.y, 5, 5);
+ }
+  
+}
+  public void settings() {  size(1800, 1200); }
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "Evolution" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
   }
 }
